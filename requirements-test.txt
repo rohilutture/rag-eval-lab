@@ -1,0 +1,8 @@
+numpy
+httpx
+pyyaml
+rank-bm25
+beautifulsoup4
+pypdf
+fastapi
+pytest

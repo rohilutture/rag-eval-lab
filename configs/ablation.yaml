@@ -1,0 +1,25 @@
+# Each config is run over the same golden set. `index` points at a directory built by
+# scripts/build_index.py (chunk size is an ablation axis, so it lives in the index).
+golden: data/golden/golden.jsonl
+# Use a judge at least as strong as the answering model. Calibrate it (evals/calibrate.py)
+# before trusting the numbers.
+judge: ollama:qwen2.5:14b          # or openai:gpt-4o-mini / anthropic:claude-haiku-4-5
+baseline: bm25
+
+defaults:
+  llm: ollama:llama3.1:8b
+  embedder: st:BAAI/bge-small-en-v1.5
+  reranker_model: BAAI/bge-reranker-base
+  k: 5
+  fanout: 40
+  index: indexes/c200
+
+configs:
+  - {name: bm25,                 retriever: bm25,   rerank: null}
+  - {name: dense,                retriever: dense,  rerank: null}
+  - {name: hybrid,               retriever: hybrid, rerank: null}
+  - {name: hybrid+rerank,        retriever: hybrid, rerank: cross-encoder}
+  - {name: hybrid+rerank-k3,     retriever: hybrid, rerank: cross-encoder, k: 3}
+  - {name: hybrid+rerank-k10,    retriever: hybrid, rerank: cross-encoder, k: 10}
+  - {name: hybrid+rerank-c400,   retriever: hybrid, rerank: cross-encoder, index: indexes/c400}
+  - {name: hybrid+rerank-c100,   retriever: hybrid, rerank: cross-encoder, index: indexes/c100}

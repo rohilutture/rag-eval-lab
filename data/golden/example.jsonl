@@ -1,0 +1,3 @@
+{"id": "q0001", "question": "What was NVIDIA's total revenue for fiscal year 2025?", "answer": "<copy from the filing>", "evidence": ["<exact sentence or table row from the 10-K>"], "type": "numeric"}
+{"id": "q0002", "question": "Which segment drove most of the revenue growth, and by how much did it grow?", "answer": "<...>", "evidence": ["<quote 1>", "<quote 2>"], "type": "multi_hop"}
+{"id": "q0003", "question": "What was Apple's revenue from its electric vehicle business?", "answer": "", "evidence": [], "type": "unanswerable"}
