@@ -7,6 +7,7 @@ Python runs with faulthandler, so a crash leaves a traceback in results/_logs/<n
     python scripts/run_ablation.py --config configs/ablation.yaml --attempts 3
 """
 import argparse
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -33,7 +34,8 @@ for name in names:
             log.write(f"\n##### attempt {attempt}\n")
             log.flush()
             rc = subprocess.call([sys.executable, "-X", "faulthandler", "-m", "evals.run",
-                                  "--config", a.config, "--only", name], stdout=log, stderr=subprocess.STDOUT)
+                                  "--config", a.config, "--only", name], stdout=log, stderr=subprocess.STDOUT,
+                                 env={**os.environ, "PYTHONUTF8": "1"})
         if rc == 0 and Path("results", name, "per_item.jsonl").exists():
             print(f"== {name}: done", flush=True)
             break

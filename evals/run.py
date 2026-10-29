@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from collections import defaultdict
 from dataclasses import fields
 from pathlib import Path
@@ -120,6 +121,10 @@ def markdown(results: dict[str, tuple[list, dict]], baseline: str, judge_spec: s
 
 
 def main(argv=None):
+    # Windows consoles default to cp1252, which can't print the 'Δ' in the report table.
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="replace")
     p = argparse.ArgumentParser()
     p.add_argument("--config", default="configs/ablation.yaml")
     p.add_argument("--only", nargs="*", help="run a subset of config names")
