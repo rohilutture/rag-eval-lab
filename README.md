@@ -1,5 +1,9 @@
 # rag-eval-lab
 
+> **Status (work in progress).** Index build, golden set and the first three ablation configs (bm25, dense, hybrid) have run; the reranker configs and judge calibration are still to run, so the Results table below is not filled in yet.
+>
+> **Golden set provenance:** `data/golden/golden.jsonl` (111 items: 71 factoid/numeric, 20 multi-hop, 20 unanswerable) was drafted with `gpt-4o-mini` and then **verified by Claude (an AI), not by a human**: every evidence quote was checked to appear verbatim in the indexed filings, table column headers were checked for numeric rows, and unanswerable questions were checked for absence of the relevant terms across all 8 filings (`scripts/_build_golden.py`). Any judge-agreement number reported here is therefore agreement with **Claude-assigned labels, not human labels**.
+
 A retrieval-augmented QA system over SEC 10-K filings, **built around its evaluation suite**. Every design choice (BM25 vs dense vs hybrid, reranking, chunk size, k) is an ablation row with a confidence interval, not a guess.
 
 ```

@@ -123,6 +123,8 @@ def main(argv=None):
     p = argparse.ArgumentParser()
     p.add_argument("--config", default="configs/ablation.yaml")
     p.add_argument("--only", nargs="*", help="run a subset of config names")
+    p.add_argument("--resume", action="store_true",
+                   help="reuse saved results/<name>/per_item.jsonl instead of re-running that config")
     a = p.parse_args(argv)
     spec = yaml.safe_load(Path(a.config).read_text())
     golden = load_golden(Path(spec["golden"]))
@@ -134,6 +136,12 @@ def main(argv=None):
         if a.only and merged["name"] not in a.only:
             continue
         cfg = Config(**{k: v for k, v in merged.items() if k in allowed})
+        saved = Path("results") / cfg.name / "per_item.jsonl"
+        if a.resume and saved.exists():
+            rows = [json.loads(l) for l in saved.read_text(encoding="utf-8").splitlines() if l]
+            results[cfg.name] = (rows, aggregate(rows))
+            print(f"== {cfg.name} (loaded saved results)")
+            continue
         print(f"== {cfg.name}")
         results[cfg.name] = run_config(cfg, Path(merged["index"]), golden, judge,
                                        Path("results") / cfg.name)

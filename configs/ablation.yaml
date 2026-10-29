@@ -1,9 +1,8 @@
 # Each config is run over the same golden set. `index` points at a directory built by
 # scripts/build_index.py (chunk size is an ablation axis, so it lives in the index).
 golden: data/golden/golden.jsonl
-# Use a judge at least as strong as the answering model. Calibrate it (evals/calibrate.py)
-# before trusting the numbers.
-judge: ollama:qwen2.5:14b          # or openai:gpt-4o-mini / anthropic:claude-haiku-4-5
+# Judge is a different model family from the answerer (llama3.1:8b), which limits self-preference bias.
+judge: openai:gpt-4o-mini        # calibrated against Claude-assigned labels (see README), not human labels
 baseline: bm25
 
 defaults:

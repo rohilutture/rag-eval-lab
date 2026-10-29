@@ -45,7 +45,17 @@ class ChatModel:
 
     def __call__(self, system: str, user: str) -> LLMResponse:
         t0 = time.perf_counter()
-        text, i, o = getattr(self, f"_{self.provider}")(system, user)
+        fn = getattr(self, f"_{self.provider}")
+        for attempt in range(4):
+            try:
+                text, i, o = fn(system, user)
+                break
+            except (httpx.TransportError, httpx.HTTPStatusError) as e:
+                # Retry transient failures (local runner crash / GPU memory pressure, 429, 5xx); fail fast on 4xx.
+                status = getattr(getattr(e, "response", None), "status_code", None)
+                if attempt == 3 or (status is not None and status < 500 and status != 429):
+                    raise
+                time.sleep(5 * 2 ** attempt)
         pin, pout = PRICES.get(self.spec, (0.0, 0.0))
         return LLMResponse(text, i, o, time.perf_counter() - t0, (i * pin + o * pout) / 1e6)
 

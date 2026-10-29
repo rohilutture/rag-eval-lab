@@ -92,7 +92,8 @@ class CrossEncoderReranker:
     def rerank(self, query: str, hits: list[Hit], k: int) -> list[Hit]:
         if not hits:
             return hits
-        s = self.ce.predict([(query, h.chunk.text) for h in hits])
+        # batch_size=8: the default (32) hit a native access violation in torch 2.14 CPU attention on Windows.
+        s = self.ce.predict([(query, h.chunk.text) for h in hits], batch_size=8)
         order = np.argsort(-np.asarray(s), kind="stable")[:k]
         return [Hit(hits[i].chunk, float(s[i]), hits[i].source + "+rerank") for i in order]
 

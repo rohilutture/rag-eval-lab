@@ -7,3 +7,7 @@ data/golden/draft.jsonl
 indexes/
 results/
 traces.jsonl
+
+*.log
+ablation.err
+data/golden/draft_named.jsonl
