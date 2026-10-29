@@ -1,6 +1,6 @@
 # rag-eval-lab
 
-> **Status (work in progress).** Index build, golden set and the first three ablation configs (bm25, dense, hybrid) have run; the reranker configs and judge calibration are still to run, so the Results table below is not filled in yet.
+> **Status.** All 8 ablation configs have run on one setup (RTX 4090, `llama3.1:8b` answerer via Ollama, `gpt-4o-mini` judge), and the judge was calibrated. See Results below, including the limits of the evidence.
 >
 > **Golden set provenance:** `data/golden/golden.jsonl` (111 items: 71 factoid/numeric, 20 multi-hop, 20 unanswerable) was drafted with `gpt-4o-mini` and then **verified by Claude (an AI), not by a human**: every evidence quote was checked to appear verbatim in the indexed filings, table column headers were checked for numeric rows, and unanswerable questions were checked for absence of the relevant terms across all 8 filings (`scripts/_build_golden.py`). Any judge-agreement number reported here is therefore agreement with **Claude-assigned labels, not human labels**.
 
@@ -29,16 +29,29 @@ LLM and embeddings are pluggable: **Ollama (local, free) by default**, or OpenAI
 
 ## Results
 
-> Fill in from `results/ABLATION.md`.
+All 8 configs, same 111-question golden set (71 factoid/numeric, 20 multi-hop, 20 unanswerable) over 8 FY2025/26 10-Ks, answerer `llama3.1:8b` (Ollama, temperature 0), judge `gpt-4o-mini`, run on one RTX 4090 (full table with MRR and citation precision: `results/ABLATION.md`). Judge cost was about $0.02 per config.
 
-| Config | Correct | Retrieval hit@5 | Faithful | Abstains correctly | p95 ms | Δ correct vs BM25 (95% CI) |
+| Config | Correct | Retrieval hit@k | Faithful | False abstain | p50 / p95 ms | Δ correct vs BM25 (95% CI) |
 |---|---|---|---|---|---|---|
-| bm25 | _TBD_ | _TBD_ | _TBD_ | _TBD_ | _TBD_ | — |
-| dense | _TBD_ | _TBD_ | _TBD_ | _TBD_ | _TBD_ | _TBD_ |
-| hybrid | _TBD_ | _TBD_ | _TBD_ | _TBD_ | _TBD_ | _TBD_ |
-| hybrid+rerank | _TBD_ | _TBD_ | _TBD_ | _TBD_ | _TBD_ | _TBD_ |
+| bm25 | 0.766 | 0.813 | 0.726 | 0.198 | 366 / 1019 | — |
+| dense | 0.676 | 0.648 | 0.765 | 0.253 | 393 / 918 | -0.090 [-0.171, -0.009] p=0.033 |
+| hybrid | 0.766 | 0.747 | 0.811 | 0.187 | 439 / 826 | +0.000 [-0.081, +0.081] |
+| hybrid+rerank | 0.811 | 0.791 | 0.756 | 0.143 | 533 / 1094 | +0.045 [-0.036, +0.126] |
+| rerank, k=3 | 0.739 | 0.703 | 0.768 | 0.242 | 426 / 969 | -0.027 [-0.117, +0.063] |
+| rerank, k=10 | 0.793 | 0.868 | 0.775 | 0.121 | 704 / 1432 | +0.027 [-0.045, +0.108] |
+| rerank, 400-word chunks | 0.739 | 0.758 | 0.836 | 0.198 | 669 / 1186 | -0.027 [-0.108, +0.063] |
+| rerank, 100-word chunks | 0.802 | 0.802 | 0.779 | 0.154 | 433 / 955 | +0.036 [-0.045, +0.117] |
 
-Judge agreement with human labels: κ = _TBD_ on _N_ items.
+**How to read this (honestly):**
+- With 111 questions, most differences between configs are **within noise**. Only dense < BM25 has an interval that excludes zero (p = 0.033), and that p-value is not corrected for the 7 comparisons, so treat it as suggestive. A plausible reason is that filings are full of exact figures and names, which keyword search handles well.
+- Reranking is the best config (+4.5 points correct, fewest false abstains), but its interval spans zero, so this run does not prove it helps.
+- More passages (k=10) gave the best retrieval hit rate (0.868) but not better correctness than k=5. k=3 was worse.
+- Abstention on the 20 unanswerable questions was perfect in 7 of 8 configs (0.95 for the 400-word-chunk config), but every config also wrongly refuses 12-25% of answerable questions.
+- Latency is on a 4090 with the reranker on the GPU; it will differ on other hardware.
+
+**Judge calibration (not a human-label result).** I compared the judge to correctness labels on the answerable questions of the `hybrid+rerank` run (91 items). **The labels were assigned by Claude (an AI), blind to the judge's verdicts, not by a human**, using a stated rubric (`scripts/_claude_labels.py`, `data/label_sheet_claude.csv`). On the 78 items the judge actually scored (13 "I don't know" answers are never judged), agreement is 94.9% with Cohen's κ = 0.72 (bootstrap 95% CI 0.37 to 0.94, wide because there are only 6 negatives); counting the 13 abstentions as incorrect, 95.6% and κ = 0.88 over all 91. The 4 disagreements are borderline calls (an answer with extra factors, a figure given in a table without being stated, a related but different statement, and two numbers given without their difference). A human-labeled κ has not been measured. Calibration was done on one config's answers only.
+
+**Golden set provenance.** Drafted with `gpt-4o-mini`, then verified by Claude, not a human: every evidence quote appears verbatim in the indexed filings (`scripts/verify_golden.py`), table column headers were checked for numeric rows, and unanswerable questions were checked for absence of the relevant terms. The multi-hop and unanswerable questions were written by Claude.
 
 ## Run it
 
