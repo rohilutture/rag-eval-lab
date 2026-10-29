@@ -1,0 +1,33 @@
+{
+  "config": {
+    "name": "bm25",
+    "retriever": "bm25",
+    "rerank": null,
+    "fanout": 40,
+    "k": 5,
+    "llm": "ollama:llama3.1:8b",
+    "embedder": "st:BAAI/bge-small-en-v1.5",
+    "reranker_model": "BAAI/bge-reranker-base"
+  },
+  "n": 111,
+  "correct": 0.7658,
+  "correct_by_type": {
+    "factoid": 0.8684,
+    "multi_hop": 0.5,
+    "numeric": 0.6667,
+    "unanswerable": 1.0
+  },
+  "retrieval_hit": 0.8132,
+  "evidence_recall": 0.7875,
+  "mrr": 0.6872,
+  "faithful": 0.726,
+  "citation_precision": 0.7009,
+  "numeric_match": 0.56,
+  "abstain_on_unanswerable": 1.0,
+  "false_abstain": 0.1978,
+  "latency_p50_ms": 365.6,
+  "latency_p95_ms": 1019.0,
+  "cost_per_query_usd": 0.0,
+  "judge_cost_usd": 0.0188,
+  "judge_errors": 0
+}

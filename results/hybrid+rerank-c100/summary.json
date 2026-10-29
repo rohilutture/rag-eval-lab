@@ -1,0 +1,33 @@
+{
+  "config": {
+    "name": "hybrid+rerank-c100",
+    "retriever": "hybrid",
+    "rerank": "cross-encoder",
+    "fanout": 40,
+    "k": 5,
+    "llm": "ollama:llama3.1:8b",
+    "embedder": "st:BAAI/bge-small-en-v1.5",
+    "reranker_model": "BAAI/bge-reranker-base"
+  },
+  "n": 111,
+  "correct": 0.8018,
+  "correct_by_type": {
+    "factoid": 0.8421,
+    "multi_hop": 0.55,
+    "numeric": 0.7879,
+    "unanswerable": 1.0
+  },
+  "retrieval_hit": 0.8022,
+  "evidence_recall": 0.7674,
+  "mrr": 0.5821,
+  "faithful": 0.7792,
+  "citation_precision": 0.7232,
+  "numeric_match": 0.6933,
+  "abstain_on_unanswerable": 1.0,
+  "false_abstain": 0.1538,
+  "latency_p50_ms": 433.4,
+  "latency_p95_ms": 955.2,
+  "cost_per_query_usd": 0.0,
+  "judge_cost_usd": 0.0155,
+  "judge_errors": 0
+}
